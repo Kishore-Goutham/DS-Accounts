@@ -30,6 +30,7 @@ export function ServiceBreakdownTable({ data = [] }) {
     );
 
   const numCell = { textAlign: "right", fontVariantNumeric: "tabular-nums" };
+  const centerCell = { textAlign: "center", fontVariantNumeric: "tabular-nums" };
 
   return (
     <Paper withBorder radius="md" p="md" h="100%">
@@ -43,9 +44,9 @@ export function ServiceBreakdownTable({ data = [] }) {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Service type</Table.Th>
-                <Table.Th style={{ textAlign: "right" }}>
+                <Table.Th style={{ textAlign: "center" }}>
                   <UnstyledButton onClick={() => toggle("count")} w="100%">
-                    <Group gap={4} justify="flex-end" wrap="nowrap">
+                    <Group gap={4} justify="center" wrap="nowrap">
                       <Text fw={600} fz="sm">Bookings</Text>
                       <SortIcon f="count" />
                     </Group>
@@ -66,7 +67,7 @@ export function ServiceBreakdownTable({ data = [] }) {
               {sorted.map((s) => (
                 <Table.Tr key={s.serviceType}>
                   <Table.Td>{s.serviceType}</Table.Td>
-                  <Table.Td style={numCell}>{s.count}</Table.Td>
+                  <Table.Td style={centerCell}>{s.count}</Table.Td>
                   <Table.Td style={numCell}>{formatINR(s.revenue)}</Table.Td>
                   <Table.Td style={numCell}>
                     {totalRevenue ? Math.round((s.revenue / totalRevenue) * 100) : 0}%
@@ -77,7 +78,7 @@ export function ServiceBreakdownTable({ data = [] }) {
             <Table.Tfoot>
               <Table.Tr>
                 <Table.Th>Total</Table.Th>
-                <Table.Th style={numCell}>{totalCount}</Table.Th>
+                <Table.Th style={centerCell}>{totalCount}</Table.Th>
                 <Table.Th style={numCell}>{formatINR(totalRevenue)}</Table.Th>
                 <Table.Th style={{ textAlign: "right" }}>100%</Table.Th>
               </Table.Tr>
