@@ -1,4 +1,14 @@
-import { Table, UnstyledButton, Group, Text, ActionIcon } from "@mantine/core";
+import {
+  Table,
+  UnstyledButton,
+  Group,
+  Text,
+  ActionIcon,
+  Paper,
+  Stack,
+  Badge,
+} from "@mantine/core";
+import { useMediaQuery } from "@mantine/hooks";
 import {
   IconChevronUp,
   IconChevronDown,
@@ -20,8 +30,69 @@ function SortIcon({ active, order }) {
   return order === "asc" ? <IconChevronUp size={14} /> : <IconChevronDown size={14} />;
 }
 
+// Edit / delete buttons, shared by both layouts.
+function RowActions({ row, onEdit, onDelete }) {
+  return (
+    <Group gap={4} justify="flex-end" wrap="nowrap">
+      {onEdit && (
+        <ActionIcon variant="subtle" color="gray" onClick={() => onEdit(row)} aria-label="Edit">
+          <IconPencil size={16} />
+        </ActionIcon>
+      )}
+      {onDelete && (
+        <ActionIcon variant="subtle" color="red" onClick={() => onDelete(row)} aria-label="Delete">
+          <IconTrash size={16} />
+        </ActionIcon>
+      )}
+    </Group>
+  );
+}
+
+// Phone layout: one card per record, no horizontal scrolling.
+function MobileCards({ rows, showActions, onEdit, onDelete }) {
+  return (
+    <Stack gap="sm">
+      {rows.map((row) => (
+        <Paper key={row._id} withBorder radius="md" p="sm">
+          <Group justify="space-between" align="flex-start" wrap="nowrap">
+            <Stack gap={6} style={{ minWidth: 0 }}>
+              <Text fw={600} style={{ wordBreak: "break-word" }}>
+                {row.customerName}
+              </Text>
+              <Badge variant="light" color="teal" size="sm" style={{ textTransform: "none" }}>
+                {row.serviceType}
+              </Badge>
+              <Text size="xs" c="dimmed">
+                {formatDate(row.date)}
+              </Text>
+            </Stack>
+            <Stack gap={8} align="flex-end" style={{ flexShrink: 0 }}>
+              <Text
+                fw={700}
+                style={{ whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}
+              >
+                {formatINR(row.amount)}
+              </Text>
+              {showActions && <RowActions row={row} onEdit={onEdit} onDelete={onDelete} />}
+            </Stack>
+          </Group>
+        </Paper>
+      ))}
+    </Stack>
+  );
+}
+
 export function IncomeTable({ rows, sortBy, order, onSort, onEdit, onDelete }) {
   const showActions = Boolean(onEdit || onDelete);
+  // Mantine `sm` breakpoint = 48em. Below it, swap the table for cards.
+  // `useMediaQuery` is undefined on the first paint; default to the table then.
+  const isMobile = useMediaQuery("(max-width: 48em)");
+
+  if (isMobile) {
+    return (
+      <MobileCards rows={rows} showActions={showActions} onEdit={onEdit} onDelete={onDelete} />
+    );
+  }
 
   return (
     <Table.ScrollContainer minWidth={600}>
@@ -61,18 +132,7 @@ export function IncomeTable({ rows, sortBy, order, onSort, onEdit, onDelete }) {
               </Table.Td>
               {showActions && (
                 <Table.Td>
-                  <Group gap={4} justify="flex-end" wrap="nowrap">
-                    {onEdit && (
-                      <ActionIcon variant="subtle" color="gray" onClick={() => onEdit(row)} aria-label="Edit">
-                        <IconPencil size={16} />
-                      </ActionIcon>
-                    )}
-                    {onDelete && (
-                      <ActionIcon variant="subtle" color="red" onClick={() => onDelete(row)} aria-label="Delete">
-                        <IconTrash size={16} />
-                      </ActionIcon>
-                    )}
-                  </Group>
+                  <RowActions row={row} onEdit={onEdit} onDelete={onDelete} />
                 </Table.Td>
               )}
             </Table.Tr>

@@ -19,6 +19,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Internal docs (keep local, don't publish)
+CLAUDE.md
+**/PLAN.md
+
 # Editor / OS
 .vscode/*
 !.vscode/extensions.json
