@@ -1,19 +1,19 @@
 import { Group, Select, ActionIcon, Tooltip } from "@mantine/core";
 import { IconSortAscending, IconSortDescending } from "@tabler/icons-react";
 
-const FIELDS = [
+const INCOME_FIELDS = [
   { value: "date", label: "Date" },
   { value: "amount", label: "Amount" },
   { value: "customerName", label: "Customer" },
   { value: "serviceType", label: "Service type" },
 ];
 
-export function SortControl({ sortBy, order, onChange }) {
+export function SortControl({ sortBy, order, onChange, fields = INCOME_FIELDS }) {
   return (
     <Group gap={6} wrap="nowrap" align="flex-end">
       <Select
         label="Sort by"
-        data={FIELDS}
+        data={fields}
         value={sortBy}
         onChange={(v) => v && onChange({ sortBy: v, order })}
         allowDeselect={false}

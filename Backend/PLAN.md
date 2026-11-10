@@ -1,7 +1,7 @@
 # DS-Accounts — Backend Design & Implementation Plan
 
-**Status:** Approved — Phase 1 ready to implement · **Date:** 2026-11-07
-**Scope of this phase:** Income module (backend only). Expenditure module and analytics UI come later but the design leaves room for both.
+**Status:** Phases 1–4 implemented · **Date:** 2026-11-07 (Payment module added 2026-11-10)
+**Scope:** Income module (backend + frontend) and the Payment/expenditure module (backend + frontend + dashboard net view). See §12 for the Payment module.
 
 ---
 
@@ -303,8 +303,9 @@ Accepts the **same filter params** as the list. The repository runs MongoDB aggr
 - Records table (filters/sort/pagination wired to `/incomes`)
 - Dashboard (KPIs, per-service breakdown, trend chart via `/incomes/analytics`)
 
-**Phase 4 — Expenditure module**
-- Mirror the income design; add combined income-vs-expense analytics.
+**Phase 4 — Expenditure ("Payment") module** — ✅ implemented (see §12)
+- Mirrors the income design with a free-text `source` (+ optional `note`).
+- Dashboard adds Total expenses / Net profit KPIs and a net-per-month trend.
 
 ---
 
@@ -322,3 +323,91 @@ Accepts the **same filter params** as the list. The repository runs MongoDB aggr
 - **Timezone** handling for date boundaries (see §6) — add a `tz` param if the server/user timezones diverge.
 - **Auth** layer (login/roles) if the app becomes multi-user.
 - **Tests, seed script, linting** (Phase 2).
+
+---
+
+## 12. Payment (Expenditure) module — Phase 4
+
+Implemented 2026-11-10. A **separate** module mirroring Income (per the §4
+recommendation), not a shared Transaction model. The key difference: a payment's
+**`source` is free text** (no fixed enum like `serviceType`), plus an optional
+free-text `note`.
+
+### Data model — `Payment`
+
+Collection: `payments`
+
+| Field    | Type   | Required | Rules / Default                         |
+|----------|--------|----------|------------------------------------------|
+| `source` | String | yes      | trimmed, 1–120 chars (free text)         |
+| `amount` | Number | yes      | `> 0`, finite, INR (decimals allowed)    |
+| `note`   | String | no       | trimmed, ≤ 300 chars, defaults to `""`   |
+| `date`   | Date   | no       | defaults to `Date.now`                   |
+| `createdAt` / `updatedAt` | Date | auto | Mongoose timestamps              |
+
+**Indexes:** `{ date: -1 }`, `{ source: 1, date: -1 }` (same access paths as Income).
+
+### Architecture
+
+Same layering and file naming as Income, as a parallel stack:
+`payment.model.js` · `payment.repository.js` · `payment.service.js` ·
+`payment.controller.js` · `payment.validator.js` · `payment.routes.js`
+(mounted at `/api/v1/payments` in `routes/index.js`).
+
+### Endpoints — base `/api/v1/payments`
+
+| Method | Path                 | Purpose                                      |
+|--------|----------------------|----------------------------------------------|
+| POST   | `/payments`          | create a payment                             |
+| GET    | `/payments`          | list — filter + sort + paginate              |
+| GET    | `/payments/analytics`| aggregated totals (same filters)             |
+| GET    | `/payments/sources`  | distinct sources used (for autocomplete)     |
+| GET    | `/payments/:id`      | fetch one                                    |
+| PUT    | `/payments/:id`      | update                                       |
+| DELETE | `/payments/:id`      | delete                                       |
+
+> Route order: `/analytics` and `/sources` are registered **before** `/:id`.
+
+### Filtering / sorting
+
+Reuses `utils/dateFilter.js` (same date precedence as §6). Text filters target the
+`source` field: `source` (exact, optional) and `search` (regex-escaped, case-
+insensitive partial). If both are sent, `search` wins. The frontend uses `search`.
+Sort whitelist: `date` · `amount` · `source` (default `date` desc). Pagination
+identical to Income.
+
+### Analytics — GET `/payments/analytics`
+
+```json
+{
+  "success": true,
+  "data": {
+    "totalExpense": 18100,
+    "totalCount": 3,
+    "bySource": [ { "source": "Rent", "count": 1, "amount": 15000 } ],
+    "trend":    [ { "year": 2026, "month": 10, "count": 2, "amount": 17300 } ]
+  }
+}
+```
+
+### Frontend
+
+- **Payments page** (`/payments`) mirrors Records: period + source-search filter,
+  sortable table (Date · Source · Amount, note shown dimmed), pagination,
+  add/edit/delete. Source entry is an **Autocomplete** seeded from
+  `/payments/sources`. Same mobile-card layout as Income.
+- **Nav:** `Dashboard · Income · Payments` (the old "Records" label is now
+  "Income"; route stays `/records`). Collapses to icon-only buttons below `sm`.
+- **Dashboard:** fetches income **and** payment analytics under the same filters;
+  adds **Total expenses** and **Net profit** (income − expenses, with % margin)
+  KPI cards, and the monthly trend graph now plots **net** (income − expenses)
+  per month instead of gross income. Service breakdown + donut stay income-only.
+
+> Shared frontend pieces (`FilterBar`, `SortControl`, `useSortParams`) were
+> extended with backward-compatible props (`withServiceType`, `searchPlaceholder`,
+> `fields`) so the income side is unchanged.
+
+### Not done yet
+- Backend `CORS_ORIGIN` lockdown + frontend Static Site deploy on Render.
+- Optional: payments-by-source breakdown on the dashboard (backend already
+  returns `bySource`; UI intentionally omitted for now).

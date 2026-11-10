@@ -7,24 +7,30 @@ const MONTHS = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-export function TrendChart({ data = [] }) {
+export function TrendChart({
+  data = [],
+  title = "Monthly revenue trend",
+  seriesLabel = "Revenue",
+  color = "teal.6",
+  valueKey = "revenue",
+}) {
   const chartData = data.map((d) => ({
     label: `${MONTHS[d.month - 1]} ${String(d.year).slice(2)}`,
-    revenue: d.revenue,
+    value: d[valueKey],
   }));
   const hasData = chartData.length > 0;
 
   return (
     <Paper withBorder radius="md" p="md">
       <Text fw={600} mb="md">
-        Monthly revenue trend
+        {title}
       </Text>
       {hasData ? (
         <AreaChart
           h={300}
           data={chartData}
           dataKey="label"
-          series={[{ name: "revenue", color: "teal.6", label: "Revenue" }]}
+          series={[{ name: "value", color, label: seriesLabel }]}
           curveType="monotone"
           withGradient
           withDots={chartData.length <= 24}

@@ -7,6 +7,7 @@ import { AppLayout } from "./components/layout/AppLayout.jsx";
 // libraries (recharts / @mantine/charts) only download when you open it.
 const DashboardPage = lazy(() => import("./pages/DashboardPage.jsx"));
 const RecordsPage = lazy(() => import("./pages/RecordsPage.jsx"));
+const PaymentsPage = lazy(() => import("./pages/PaymentsPage.jsx"));
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/records" element={<RecordsPage />} />
+          <Route path="/payments" element={<PaymentsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

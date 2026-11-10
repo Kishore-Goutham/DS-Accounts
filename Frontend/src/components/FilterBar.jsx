@@ -10,16 +10,18 @@ import { ServiceTypeSelect } from "./ServiceTypeSelect.jsx";
 export function FilterBar({
   filters,
   onChange,
+  withServiceType = true,
   withSearch = false,
   searchValue = "",
   onSearchChange,
+  searchPlaceholder = "Customer name",
 }) {
   const setPeriod = (period) => onChange({ ...filters, period });
   const setServiceType = (serviceType) => onChange({ ...filters, serviceType });
 
   const hasActive =
     filters.period?.mode !== "all" ||
-    Boolean(filters.serviceType) ||
+    (withServiceType && Boolean(filters.serviceType)) ||
     (withSearch && Boolean(searchValue));
 
   const clearAll = () => {
@@ -32,11 +34,13 @@ export function FilterBar({
       <Group justify="space-between" align="flex-end" wrap="wrap">
         <Group gap="sm" align="flex-end" wrap="wrap">
           <PeriodFilter period={filters.period} onChange={setPeriod} />
-          <ServiceTypeSelect value={filters.serviceType} onChange={setServiceType} />
+          {withServiceType && (
+            <ServiceTypeSelect value={filters.serviceType} onChange={setServiceType} />
+          )}
           {withSearch && (
             <TextInput
               label="Search"
-              placeholder="Customer name"
+              placeholder={searchPlaceholder}
               leftSection={<IconSearch size={16} />}
               value={searchValue}
               onChange={(e) => onSearchChange(e.currentTarget.value)}

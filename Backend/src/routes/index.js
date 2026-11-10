@@ -1,5 +1,6 @@
 import { Router } from "express";
 import incomeRoutes from "./income.routes.js";
+import paymentRoutes from "./payment.routes.js";
 import metaRoutes from "./meta.routes.js";
 import { sendSuccess } from "../utils/ApiResponse.js";
 
@@ -12,5 +13,6 @@ router.get("/health", (req, res) =>
 
 router.use(metaRoutes); // /service-types
 router.use("/incomes", incomeRoutes); // /incomes/...
+router.use("/payments", paymentRoutes); // /payments/...
 
 export default router;
