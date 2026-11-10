@@ -126,7 +126,7 @@ export default function RecordsPage() {
   return (
     <Stack>
       <Group justify="space-between" align="flex-end" wrap="wrap">
-        <Title order={2}>Records</Title>
+        <Title order={2}>Income Records</Title>
         <Group gap="sm" align="flex-end">
           <SortControl sortBy={sort.sortBy} order={sort.order} onChange={handleSortChange} />
           <Button leftSection={<IconPlus size={16} />} onClick={openAdd}>
