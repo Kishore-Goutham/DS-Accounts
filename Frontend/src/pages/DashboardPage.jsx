@@ -104,11 +104,17 @@ export default function DashboardPage() {
                 color="red"
               />
               <KpiCard
-                label="Net profit"
-                value={formatINR(net)}
-                hint={margin != null ? `${margin}% margin` : undefined}
+                label={net < 0 ? "Net loss" : "Net profit"}
+                value={formatINR(Math.abs(net))}
+                hint={
+                  margin != null
+                    ? net < 0
+                      ? `${Math.abs(margin)}% loss`
+                      : `${margin}% margin`
+                    : undefined
+                }
                 icon={IconReportMoney}
-                color={net >= 0 ? "teal" : "red"}
+                color={net < 0 ? "red" : "teal"}
               />
               <KpiCard label="Income transactions" value={totalCount} icon={IconReceipt} color="blue" />
               <KpiCard
@@ -131,6 +137,8 @@ export default function DashboardPage() {
               title="Monthly net trend (income − expenses)"
               seriesLabel="Net"
               valueKey="net"
+              color={net < 0 ? "red.6" : "teal.6"}
+              diverging
             />
 
             <Grid gutter="md">
