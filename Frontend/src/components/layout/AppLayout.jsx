@@ -2,6 +2,7 @@ import { AppShell, Group, Title, Button, ActionIcon, Tooltip } from "@mantine/co
 import { Link, useLocation } from "react-router-dom";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconChartBar, IconTable, IconCashBanknote } from "@tabler/icons-react";
+import { InstallButton } from "../InstallButton.jsx";
 
 const links = [
   { to: "/", label: "Dashboard", icon: IconChartBar },
@@ -52,6 +53,8 @@ export function AppLayout({ children }) {
                 </Button>
               );
             })}
+
+            <InstallButton compact={isMobile} />
           </Group>
         </Group>
       </AppShell.Header>
